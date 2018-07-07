@@ -37,14 +37,17 @@ for href in tweet_links:
     result = id_pattern.search(href)
     if result and result.group(1):
         tweet_ids.append(int(result.group(1)))
-
-# skip previously saved tweets
-select_last = select([tweet.c.tweet_id]).order_by(desc(tweet.c.tweet_id)).limit(1)
-last_saved_id = conn.execute(select_last).fetchone()['tweet_id']
-print('Last saved tweet {}'.format(last_saved_id))
 tweet_ids.sort()
-last_saved_index = tweet_ids.index(last_saved_id)
-tweet_ids = tweet_ids[last_saved_index + 1:]
+# skip previously saved tweets
+last_select = select([tweet.c.tweet_id]).order_by(desc(tweet.c.tweet_id)).limit(1)
+last_result = conn.execute(last_select).fetchone()
+
+if (last_result):
+    last_saved_id = last_result['tweet_id']
+    print('Last saved tweet {}'.format(last_saved_id))
+    next_index = tweet_ids.index(last_saved_id) + 1
+    print(next_index, len(tweet_ids))
+    tweet_ids = tweet_ids[next_index:]
 
 print('Will fetch {} tweets'.format(len(tweet_ids)))
 
